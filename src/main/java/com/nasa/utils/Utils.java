@@ -26,15 +26,23 @@ public class Utils {
 	public static List<String> readFileIntoDateArray(String fileName) {
 		List<String> dateList = new ArrayList<>();
 
-		try (Scanner scan = new Scanner(new File(fileName))) {
+		//check to see if file exists else quit;
+		File file = new File(fileName);
+		
+		if(!file.exists()){
+	        System.out.println("No File Present at specifid location");
+	        System.exit(0);
+		}
+		
+		try (Scanner scan = new Scanner(file)) {
 			while (scan.hasNext()) {
-
 				dateList.add(convertToYearMonthDay(scan.next()));
 			}
 		} catch (Exception e) {
 			System.out.printf("Caught Exception: %s%n", e.getMessage());
 			e.printStackTrace();
 		}
+		
 		return dateList;
 	}
 
