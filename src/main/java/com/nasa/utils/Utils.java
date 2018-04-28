@@ -22,53 +22,23 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 public class Utils {
+	
+	public static List<String> readFileIntoDateArray(String fileName) {
+		List<String> dateList = new ArrayList<>();
 
-	public static void makeRestCall(String date) {
+		try (Scanner scan = new Scanner(new File(fileName))) {
+			while (scan.hasNext()) {
 
-		OkHttpClient client = new OkHttpClient();
-
-		HttpUrl.Builder urlBuilder = HttpUrl.parse("https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos")
-				.newBuilder();
-		urlBuilder.addQueryParameter("api_key", "DEMO_KEY");// DEMO_KEY
-		urlBuilder.addQueryParameter("earth_date", date);
-		String url = urlBuilder.build().toString();
-
-		Request request = new Request.Builder().url(url).build();
-
-		client.newCall(request).enqueue(new Callback() {
-			@Override
-			public void onFailure(Request request, IOException e) {
-				e.printStackTrace();
+				dateList.add(convertToYearMonthDay(scan.next()));
 			}
-
-			@Override
-			public void onResponse(Response response) throws IOException {
-				if (!response.isSuccessful()) {
-					throw new IOException("Unexpected code " + response);
-				} else {
-					String JSONResponse = response.body().string().toString();
-					System.out.println(JSONResponse);
-					ObjectMapper mapper = new ObjectMapper();
-					try {
-						JsonNode root = mapper.readTree(JSONResponse);
-
-						// check if any photos are present
-						if (root.path("photos").size() > 0) {
-							JsonNode photoNode = root.path("photos").get(0);
-							String idSource = photoNode.path("id").asText();
-							String name = photoNode.path("img_src").asText();
-							downloadImageToFile(name, idSource);
-						}
-
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-
-			}
-		});
-
+		} catch (Exception e) {
+			System.out.printf("Caught Exception: %s%n", e.getMessage());
+			e.printStackTrace();
+		}
+		return dateList;
 	}
+
+	
 
 	public static void downloadImageToFile(String uri, String idSource) {
 
@@ -98,12 +68,12 @@ public class Utils {
 
 				buffer.flush();
 				byte[] byteArray = buffer.toByteArray();
-				writeBytesToFileClassic(byteArray, idSource + ".jpg");
+				writeBytesToFile(byteArray, idSource + ".jpg");
 			}
 		});
 	}
 
-	private static void writeBytesToFileClassic(byte[] bFile, String fileDest) {
+	private static void writeBytesToFile(byte[] bFile, String fileDest) {
 
 		FileOutputStream fileOuputStream = null;
 
@@ -123,26 +93,6 @@ public class Utils {
 			}
 		}
 
-	}
-
-	public static List<String> readFileIntoDateArray(String fileName) {
-		List<String> dateList = new ArrayList<>(5);
-
-		try (Scanner scan = new Scanner(new File(fileName))) {
-			while (scan.hasNext()) {
-
-				dateList.add(formatDate(scan.next()));
-			}
-		} catch (Exception e) {
-			System.out.printf("Caught Exception: %s%n", e.getMessage());
-			e.printStackTrace();
-		}
-		return dateList;
-	}
-
-	private static String formatDate(String next) {
-
-		return convertToYearMonthDay(next);
 	}
 
 	private static String convertToYearMonthDay(String temp) {

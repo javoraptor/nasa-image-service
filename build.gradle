@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 version = '1.0'
 jar {
     manifest {
-        attributes 'NASA-Image-Search': 'NASA-Image-Search',
+        attributes 'NASA-Image-Searches': 'NASA-Image-Searched',
                    'NASA-Image-Search': version
     }
 }
